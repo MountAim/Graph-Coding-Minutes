@@ -1,133 +1,123 @@
 #include<bits/stdc++.h>
 using namespace std;
-
-bool comp(const vector<int>&a, const vector<int>&b)
+ 
+// DSU
+ 
+vector<int> par, size;
+ 
+void init(int n)
 {
-    return a[2]<b[2];
-}
-vector<int>visit,sz;    
-int find(int x)
-{
-    if(x!=visit[x])
+    for(int i=0; i<n; i++)
     {
-        return visit[x]=find(visit[x]);
+        par[i] = -1;
+        size[i] = 1;
     }
-    return x;
 }
-void Union(int x,int y)
+ 
+int Find(int a)
 {
-    int val=find(x),val1=find(y);
-    if(val==val1)
-    {
+    if(par[a] == -1)
+        return a;
+    return par[a] = Find(par[a]);
+}
+ 
+void Union(int a, int b)
+{
+    int p1 = Find(a), p2 = Find(b);
+    if(p1==p2)
         return;
-    }
-    if(sz[val]>sz[val1])
+    if(size[p1] < size[p2])
     {
-        swap(val,val1);
+        par[p1] = p2;
+        size[p2] += size[p1];
     }
-    visit[val]=val1;
-    sz[val1]+=sz[val];
+    else
+    {
+        par[p2] = p1;
+        size[p1] = p2;
+    }
 }
-vector<vector<int>> findCriticalAndPseudoCriticalEdges(int n, vector<vector<int>> edges) {
-    unordered_set<int>cri,non_cri;
-    map<pair<int,int>,int>mapping;
-    for(int i=0;i<edges.size();i++)
+ 
+// Finding MST Cost
+ 
+int MST(vector<vector<int>> edges, int avoid)
+{
+    int cost = 0;
+    
+    for(auto e: edges)
     {
-        mapping[{edges[i][0],edges[i][1]}]=i;
+        int id = e[3];
+        if(id == avoid)
+            continue;
+            
+        int p1 = Find(e[0]);
+        int p2 = Find(e[1]);
+        if(p1 == p2)
+            continue;
+            
+        Union(p1, p2);
+        cost += e[2];
     }
-    sort(edges.begin(),edges.end(),comp);
-    visit.resize(n+1);
-    sz.resize(n+1);
-    iota(visit.begin(),visit.end(),0);
-    sz.assign(n+1,1);
-    int mst=0; 
-   
-    for(int i=0;i<edges.size();i++)
+    
+    return cost;
+}
+ 
+// Sort according to weight
+ 
+bool cmp(vector<int> a, vector<int> b)
+{
+    return a[2]<b[2];    
+}
+ 
+// Driver function
+ 
+vector<vector<int>> findCriticalAndPseudoCriticalEdges(int n, vector<vector<int>> edges)
+{
+    par.resize(n);
+    size.resize(n);
+    
+    vector<int> critical, pseudo;
+    
+    for(int i=0; i<edges.size(); i++)
     {
-        int x=edges[i][0],y=edges[i][1],ind,val=edges[i][2];
-        ind=mapping[{x,y}];
-        if(find(x)!=find(y))
-        {
-            mst+=val;
-            Union(x,y);
-            cri.insert(ind);
-        }
+        edges[i].push_back(i);
     }
-    for(int i=0;i<edges.size();i++)
+    
+    sort(edges.begin(), edges.end(), cmp);
+    
+    init(n);
+    int minCost = MST(edges, -1);
+    
+    for(auto e: edges)
     {
-        iota(visit.begin(),visit.end(),0);
-        sz.assign(n+1,1);
-        int ind=mapping[{edges[i][0],edges[i][1]}];
-        unordered_set<int>nodes;
-        int total=0;
-        for(int j=0;j<edges.size();j++)
+        init(n);
+        int cost = MST(edges, e[3]);
+        
+        // If the cost of MST by avoiding this edge is greater or the graph is disconnected at the end point vertices of this edge, then this edge is critical
+        if(cost>minCost or Find(e[0])!=Find(e[1]))
         {
-            if(i!=j)
-            {
-                int x=edges[j][0],y=edges[j][1],val=edges[j][2];
-                if(find(x)!=find(y))
-                {
-                    Union(x,y);
-                    total+=val;
-                    nodes.insert(x);
-                    nodes.insert(y);
-                }
-            }
+            critical.push_back(e[3]);
+            continue;
         }
-        if(nodes.size()==n && total==mst)
-        {
-            if(cri.find(ind)==cri.end()){
-                iota(visit.begin(),visit.end(),0);
-                sz.assign(n+1,1);
-                Union(edges[i][0],edges[i][1]);
-                int value=edges[i][2];
-                unordered_set<int>nodes;
-                nodes.insert(edges[i][1]);
-                nodes.insert(edges[i][0]);
-                for(int j=0;j<edges.size();j++)
-                {
-                    if(i!=j)
-                    {
-                        int x=edges[j][0],y=edges[j][1],val=edges[j][2];
-                        if(find(x)!=find(y))
-                        {
-                            Union(x,y);
-                            value+=val;
-                            nodes.insert(x);
-                            nodes.insert(y);
-                        }
-                    }
-                }
-                if(nodes.size()==n && value==mst)
-                {
-                    non_cri.insert(ind);
-                }
-            }
-            else{
-                cri.erase(ind);
-                non_cri.insert(ind);
-            }
-        }
+        
+        // Else check if including the edge results in BST, then it is pseudo-critical else not useful edge
+        init(n);
+        
+        // Include this edge forcefully
+        Union(e[0], e[1]);
+        cost = e[2];
+        
+        cost += MST(edges, e[3]);
+        
+        if(cost == minCost)
+            pseudo.push_back(e[3]);
     }
-    vector<vector<int>>ans;
-    for(int i=0;i<2;i++)
-    {
-        vector<int>v;
-        if(i==0)
-        {
-            for(auto itr:cri)
-            {
-                v.push_back(itr);
-            }
-        }
-        else{
-            for(auto itr:non_cri)
-            {
-                v.push_back(itr);
-            }
-        }
-        sort(v.begin(),v.end());
-        ans.push_back(v);
-    }
+    
+    vector<vector<int>> ans;
+    sort(critical.begin(),critical.end());
+    sort(pseudo.begin(),pseudo.end());
+    ans.push_back(critical);
+    ans.push_back(pseudo);
+    
     return ans;
 }
