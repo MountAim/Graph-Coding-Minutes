@@ -23,6 +23,7 @@ void dfs(int k, int par)
 }
 int solve(int n, vector<vector<int>> edges)
 {
+    ans=0;
     g=vector<vector<int>>(n+1,vector<int>());
     sub=vector<int>(n+1);
 	for(int i=0;i<edges.size();i++)
