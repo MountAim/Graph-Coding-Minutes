@@ -2,7 +2,7 @@
 using namespace std;
 
 int par[1005],sz[1005];
-vector<pair<int,pair<int,int> > > edges;
+
 int findpar(int u){
     if(u==par[u]){return u;}
     return par[u] = findpar(par[u]);
@@ -21,6 +21,7 @@ int minCostConnectPoints(vector<vector<int>> points) {
     for(int i=0;i<=1000;i++){
         par[i]=i;sz[i]=1;
     }
+    vector<pair<int,pair<int,int> > > edges;
     int n=points.size();
     for(int i=0;i<points.size();i++){
         for(int j=i+1;j<points.size();j++){
@@ -31,7 +32,7 @@ int minCostConnectPoints(vector<vector<int>> points) {
     sort(edges.begin(),edges.end());
     int ans=0;
     int cnt=0,i=0;
-    while(cnt<n-1){
+    while(i<edges.size()){
         int u = edges[i].second.first, v= edges[i].second.second, w = edges[i].first;
         if(fmerge(u,v)){
             cnt++;
