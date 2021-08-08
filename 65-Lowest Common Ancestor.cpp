@@ -4,7 +4,7 @@ using namespace std;
 vector<vector<int>>v,up;
 vector<int>tin,tout;
 int level,timer;
-void dfs(int x,int p,int w,vector<int>& a)
+void dfs(int x,int p)
 {
     tin[x]=++timer;
     up[x][0]=p;
@@ -16,7 +16,7 @@ void dfs(int x,int p,int w,vector<int>& a)
     {
         if(itr!=p)
         {
-            dfs(itr,x,a[itr-1],a);
+            dfs(itr,x);
         }
     }
     tout[x]=++timer;
@@ -52,7 +52,6 @@ vector<int> LCA(int n, vector<vector<int>>edges, vector<vector<int>>queries)
     level=ceil(log2(n));
     up.assign(n+1,vector<int>(level+1));
     v=vector<vector<int>>(n+1,vector<int>());
-    
     int x,y,val;
     vector<int>ans;
     for(int i=0;i<edges.size();i++)
@@ -61,6 +60,7 @@ vector<int> LCA(int n, vector<vector<int>>edges, vector<vector<int>>queries)
         v[x].push_back(y);
         v[y].push_back(x);
     }
+    dfs(1,0);
     for(int i=0;i<queries.size();i++)
     {
         x=queries[i][0],y=queries[i][1];
