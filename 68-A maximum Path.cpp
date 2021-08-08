@@ -11,7 +11,7 @@ void dfs(int x,int p,int d, vector<int>&a)
     in[x]=++timer;
     if(p!=0)
     {
-        maxi[x][0]=max(a[x-1],a[p]);
+        maxi[x][0]=max(a[x-1],a[p-1]);
     }
  
     for(int i=1;i<=level;i++)
@@ -84,13 +84,13 @@ int solve(int u,int v,int anc, vector<int>&a)
 vector<int> maximumPath (int n, vector<int> a, vector<vector<int>> edges, vector<vector<int>> queries)
 {
     v=vector<vector<int>>(n+1,vector<int>());
-    in.assign(n+1,0);
-    out.assign(n+1,1e9);
+    in= vector<int>(n+1,0);
+    out= vector<int>(n+1, 1e9);
     timer=0;
     level=ceil(log2(n));
-    up.assign(n+1,vector<int>(level+1));
-    depth.assign(n+1,0);
-    maxi.assign(n+1,vector<int>(level+1));
+    up=vector<vector<int>>(n+1,vector<int>(level+1,0));
+    depth=vector<int>(n+1,0);
+    maxi=vector<vector<int>>(n+1,vector<int>(level+1,0));
     int x,y,val;
     for(int i=0;i<n-1;i++)
     {
