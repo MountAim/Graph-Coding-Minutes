@@ -13,7 +13,7 @@ int ladderLength(string beginWord, string endWord, vector<string> wordList) {
     while(!q.empty())
     {
         ans++;
-        vector<string>v;
+        //vector<string>v;
         int n=q.size();
         for(int i=0;i<n;i++)
         {
@@ -21,6 +21,7 @@ int ladderLength(string beginWord, string endWord, vector<string> wordList) {
             if(str==endWord){
                 return ans;
             }
+            s.erase(str);
             for(int j=0;j<str.size();j++)
             {
                 char ch=str[j];
@@ -29,18 +30,19 @@ int ladderLength(string beginWord, string endWord, vector<string> wordList) {
                     str[j]=char(97+k);
                     if(s.find(str)!=s.end())
                     {
-                        v.push_back(str);
-                        s.erase(str);
+                        //v.push_back(str);
+                        //s.erase(str);
+                        q.push(str);
                     }
                 }
                 str[j]=ch;
             }
             q.pop();
         }
-        for(auto itr:v)
-        {
-            q.push(itr);
-        }
+//         for(auto itr:v)
+//         {
+//             q.push(itr);
+//         }
     }
     return 0;     
 }
