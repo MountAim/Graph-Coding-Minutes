@@ -1,14 +1,35 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-bool canFinish(vector<vector<int>> prerequisites, int n) {
-    vector<vector<int>> G(n);
-    vector<int> degree(n, 0), bfs;
-    for (auto& e : prerequisites)
-        G[e[1]].push_back(e[0]), degree[e[0]]++;
-    for (int i = 0; i < n; ++i) if (!degree[i]) bfs.push_back(i);
-    for (int i = 0; i < bfs.size(); ++i)
-        for (int j: G[bfs[i]])
-            if (--degree[j] == 0) bfs.push_back(j);
-    return bfs.size() == n;
+vector<int> findOrder(int numCourses, vector<vector<int>> prerequisites) {
+    vector<int> degree(numCourses),vis(numCourses);
+    vector<set<int>> gp(numCourses);
+    for(auto &it:prerequisites){
+        gp[it[1]].insert(it[0]);
+        degree[it[0]]+=1;
+    }
+    
+    vector<int> ans;
+    priority_queue<int> q;
+    for(int i=0;i<numCourses;i++){
+        if(degree[i]==0){
+            q.push(-1*i);
+        }
+    }
+    
+    while(!q.empty()){
+        int node=-1*q.top();
+        ans.push_back(node);
+        q.pop();
+        vis[node]=1;
+        for(auto &it:gp[node]){
+            if(vis[it]) return {};
+            
+            degree[it]-=1;
+            if(degree[it]==0){
+                q.push(-1*it);
+            }
+        }
+    }
+    return ans;
 }
