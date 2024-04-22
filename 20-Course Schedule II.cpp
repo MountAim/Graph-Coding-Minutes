@@ -1,14 +1,43 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-bool canFinish(vector<vector<int>> prerequisites, int n) {
-    vector<vector<int>> G(n);
-    vector<int> degree(n, 0), bfs;
-    for (auto& e : prerequisites)
-        G[e[1]].push_back(e[0]), degree[e[0]]++;
-    for (int i = 0; i < n; ++i) if (!degree[i]) bfs.push_back(i);
-    for (int i = 0; i < bfs.size(); ++i)
-        for (int j: G[bfs[i]])
-            if (--degree[j] == 0) bfs.push_back(j);
-    return bfs.size() == n;
+vector<int> findOrder(int numCourses, vector<vector<int>> prerequisites) {
+    vector<vector<int>> adj(numCourses);
+    vector<int> indegree(numCourses, 0);
+    priority_queue<int, vector<int>, greater<int>> q; // Use priority queue
+
+    for (auto& u : prerequisites) {
+        auto ai = u[0];
+        auto bi = u[1];
+        adj[bi].push_back(ai);
+        indegree[ai]++;
+    }
+
+    for (int i = 0; i < numCourses; ++i) {
+        if (!indegree[i]) {
+            q.push(i);
+        }
+    }
+
+    vector<int> ans;
+    int n = 0;
+    while (!q.empty()) {
+        auto item = q.top(); // Use top() instead of front() for priority queue
+        q.pop();
+        ans.push_back(item);
+        n++;
+        for (auto k : adj[item]) {
+            indegree[k]--;
+            if (indegree[k] == 0) {
+                q.push(k);
+            }
+        }
+    }
+
+    // Check if all courses can be taken
+    if (n == numCourses) {
+        return ans;
+    } else {
+        return vector<int>();
+    }
 }
